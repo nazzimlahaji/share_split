@@ -1,0 +1,28 @@
+services:
+  pgsql:
+    image: "postgres:latest"
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: "${POSTGRES_DATABASENAME:-postgres}"
+      POSTGRES_USER: "${POSTGRES_USER:-admin}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-secret}"
+    volumes:
+      - "./app/storage/volume:/var/lib/postgresql/data"
+    ports:
+      - "${POSTGRES_PORT:-3842}:5432"
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "pg_isready -q -d ${POSTGRES_DATABASENAME:-postgres} -U ${POSTGRES_USER:-admin}"
+      retries: 3
+      timeout: 5s
+
+# networks:
+#   default:
+#     external:
+#       name: ${NETWORK:-api_network}
+
+# volumes:
+#   pgsql_data:
+#     driver: local
