@@ -3,6 +3,7 @@ package main
 import (
 	"api/controllers"
 	"api/initializers"
+	"api/middleware"
 	"log"
 	"os"
 
@@ -19,7 +20,17 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.POST("/user/create", controllers.CreateUser)
+		// Public routes
+
+		// Protected routes
+		
+		api.Use(middleware.RequireAuth())
+		{
+			api.GET("/whoami", controllers.Whoami)
+
+			api.POST("/user/create", controllers.CreateUser)
+			api.GET("/user/list", controllers.UserList)
+		}
 	}
 
 	port := os.Getenv("API_PORT")

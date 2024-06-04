@@ -15,7 +15,6 @@ type AppConfig struct {
 	Password     string
 	DatabaseName string
 	SSLMode      string
-	TimeZone     string
 }
 
 var DB *gorm.DB
@@ -29,17 +28,16 @@ func ConnectToDb() {
 		Password:     os.Getenv("POSTGRES_PASSWORD"),
 		DatabaseName: os.Getenv("POSTGRES_DATABASENAME"),
 		SSLMode:      os.Getenv("POSTGRES_SSLMODE"),
-		TimeZone:     os.Getenv("POSTGRES_TIMEZONE"),
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+	// Timezone is set to default (UTC)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		appConfig.Hostname,
 		appConfig.User,
 		appConfig.Password,
 		appConfig.DatabaseName,
 		appConfig.Port,
 		appConfig.SSLMode,
-		appConfig.TimeZone,
 	)
 
 	var err error

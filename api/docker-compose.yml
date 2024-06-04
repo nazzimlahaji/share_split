@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: "${POSTGRES_USER:-admin}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-secret}"
     volumes:
-      - "./app/storage/volume:/var/lib/postgresql/data"
+      - "./storage/volume:/var/lib/postgresql/data"
     ports:
       - "${POSTGRES_PORT:-3842}:5432"
     healthcheck:
