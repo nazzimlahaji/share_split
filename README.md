@@ -24,3 +24,6 @@ pnpm install
 ```
 pnpm run dev
 ```
+
+### Note:
+- For creating the API, I'm just using the GET & POST method.
