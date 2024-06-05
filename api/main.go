@@ -23,7 +23,6 @@ func main() {
 		// Public routes
 
 		// Protected routes
-		
 		api.Use(middleware.RequireAuth())
 		{
 			api.GET("/whoami", controllers.Whoami)
