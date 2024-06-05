@@ -65,9 +65,12 @@ function FirebaseLoginPage() {
   }
 
   return (
-    <Button type="primary" shape="round" size="middle" onClick={signInGoogle}>
-      Sign In with Google
-    </Button>
+    <>
+      <h1>Login Page</h1>
+      <Button type="primary" shape="round" size="middle" onClick={signInGoogle}>
+        Sign In with Google
+      </Button>
+    </>
   );
 }
 
