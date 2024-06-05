@@ -1,29 +1,14 @@
-import {
-  SmileOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { SmileOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout, Menu, Spin, Typography, theme } from "antd";
 import { onAuthStateChanged } from "firebase/auth";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useGetIdentityQuery } from "../api/apiSlice";
+import { drawerList } from "../data/drawerList";
 import { auth, signOut } from "../hooks/firebase";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
-
-const items = [
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
-  UserOutlined,
-].map((icon, index) => ({
-  key: String(index + 1),
-  icon: React.createElement(icon),
-  label: `nav ${index + 1}`,
-}));
 
 function ProtectedDashboardPage() {
   const user = auth.currentUser;
@@ -100,7 +85,14 @@ function ProtectedDashboardPage() {
           theme="dark"
           mode="inline"
           defaultSelectedKeys={["1"]}
-          items={items}
+          items={drawerList.map((row) => {
+            return {
+              key: row.key,
+              icon: row.icon,
+              label: row.label,
+              onClick: () => navigate(row.path),
+            };
+          })}
         />
       </Sider>
       <Layout>

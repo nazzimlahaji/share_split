@@ -23,6 +23,10 @@ export const router = createBrowserRouter([
         index: true,
         element: <DashboardMainPage />,
       },
+      {
+        path: "*",
+        element: <PageNotFound />,
+      },
     ],
   },
   // {
