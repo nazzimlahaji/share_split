@@ -7,7 +7,7 @@ Note that it uses React Typescript as frontend and Golang as Backend. It uses fi
 1. Copy **.env.example** to **.env** in both 'api' folder and make sure to fill in the require fields with your specific configuration values.
 2. Run the migration file in 'api' folder to migrate the table to your database.
 ```
-go run migrate/migrate.go
+go run database/migrate/migrate.go
 ```
 3. All done and you can run the system API using this command below in 'api' folder.
 ```

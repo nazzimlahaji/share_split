@@ -9,5 +9,6 @@ export interface IdentifyResult {
     DeletedAt: string | null;
     Email: string;
     Name: string;
+    Uuid: string;
   };
 }

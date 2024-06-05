@@ -1,9 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import "api/helpers"
 
 type Users struct {
-	gorm.Model
+	helpers.Model
 	Email string `gorm:"unique"`
 	Name  string
 }

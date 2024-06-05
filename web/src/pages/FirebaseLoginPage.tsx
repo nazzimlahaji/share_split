@@ -57,6 +57,7 @@ function FirebaseLoginPage() {
   async function signInGoogle() {
     try {
       await signInWithPopup(auth, googleProvider);
+      navigate("/dashboard", { replace: true });
     } catch (e) {
       // handle error here
       console.error(e);

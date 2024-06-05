@@ -1,9 +1,9 @@
 import { SmileOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout, Menu, Spin, Typography, theme } from "antd";
 import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useGetIdentityQuery } from "../api/apiSlice";
+import { useGetIdentityQuery, useLazyGetIdentityQuery } from "../api/apiSlice";
 import { drawerList } from "../data/drawerList";
 import { auth, signOut } from "../hooks/firebase";
 
@@ -13,21 +13,44 @@ const { Text } = Typography;
 function ProtectedDashboardPage() {
   const user = auth.currentUser;
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const { isFetching } = useGetIdentityQuery(undefined, {
     skip: !user,
   });
+  const [trigger, result] = useLazyGetIdentityQuery();
+  const { data, error, isLoading, isSuccess, isError } = result;
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  // useEffect => to listen on firebase auth changed and
+  // trigger fetching of /whoami endpoint only if user email is verified
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, () => {
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (curUser) => {
+      // console.log("onAuthStateChanged");
+      if (curUser) {
+        if (curUser?.emailVerified) {
+          // console.log("verify whoami");
+          trigger();
+        } else {
+          console.error("User email is not verified");
+        }
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [trigger]);
+
+  // useEffect => that will only be trigger when the current page is being loaded.
+  useEffect(() => {
+    if (user && data && isSuccess && user.email === data.data.Email) {
+      // console.log("navigate to dashboard");
+      navigate("/dashboard", { replace: true });
+    } else if (isError && error) {
+      console.error("Authorization Error:", error);
+      navigate("/login", { replace: true });
+    }
+  }, [data, error, isError, isSuccess, navigate, user]);
 
   async function handleLogout() {
     await signOut();
@@ -35,7 +58,7 @@ function ProtectedDashboardPage() {
     navigate("/login", { replace: true });
   }
 
-  if (loading || isFetching) {
+  if (isFetching || isLoading) {
     return (
       <Flex
         justify="center"
