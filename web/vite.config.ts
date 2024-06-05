@@ -28,10 +28,10 @@ export default defineConfig(({ mode }) => {
       port: parseInt(env.VITE_PORT), // Convert port to a number
       strictPort: true,
       host: true,
-      // open: true,
-      // proxy: {
-      //   "/api": env.VITE_PROXY_API_URL, // Directly use the environment variable
-      // },
+      open: true,
+      proxy: {
+        "/api": env.VITE_PROXY_API_URL, // Directly use the environment variable
+      },
     },
   };
 });
