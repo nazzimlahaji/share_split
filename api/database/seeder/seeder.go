@@ -14,8 +14,24 @@ func init() {
 func main() {
 	log.Default().Println("Seeding start. Please wait...")
 
+	// Create roles
+	roles := []models.Role{
+		{Name: "Admin"},
+		{Name: "User"},
+	}
+
+	for i, role := range roles {
+		result := initializers.DB.Create(&role)
+		if result.Error != nil {
+			panic(result.Error)
+		}
+		// Update the role in the slice with the created role to get the ID
+		roles[i] = role
+	}
+
+	// Create users
 	users := []models.Users{
-		{Email: "nazzimlahaji@gmail.com", Name: "Nazzim"},
+		{Email: "nazzimlahaji@gmail.com", Name: "Nazzim", RoleID: roles[0].ID},
 	}
 
 	for _, user := range users {
