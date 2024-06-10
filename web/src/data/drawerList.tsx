@@ -5,12 +5,12 @@ export const drawerList = [
     key: "1",
     icon: <UserOutlined />,
     label: "Dashboard",
-    path: "",
+    path: "/dashboard",
   },
   {
     key: "2",
     icon: <UserOutlined />,
     label: "User Management",
-    path: "user-management",
+    path: "/dashboard/user-management",
   },
 ];

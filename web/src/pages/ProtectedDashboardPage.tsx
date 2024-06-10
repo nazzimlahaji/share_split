@@ -1,5 +1,15 @@
 import { SmileOutlined } from "@ant-design/icons";
-import { Button, Flex, Layout, Menu, Spin, Typography, theme } from "antd";
+import {
+  Avatar,
+  Button,
+  Flex,
+  Grid,
+  Layout,
+  Menu,
+  Spin,
+  Typography,
+  theme,
+} from "antd";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -9,6 +19,7 @@ import { auth, signOut } from "../hooks/firebase";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 function ProtectedDashboardPage() {
   const user = auth.currentUser;
@@ -19,8 +30,12 @@ function ProtectedDashboardPage() {
   const [trigger, result] = useLazyGetIdentityQuery();
   const { data, error, isLoading, isSuccess, isError } = result;
 
+  const screens = useBreakpoint();
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: {
+      colorBgContainer,
+      // borderRadiusLG
+    },
   } = theme.useToken();
 
   // useEffect => to listen on firebase auth changed and
@@ -45,7 +60,7 @@ function ProtectedDashboardPage() {
   useEffect(() => {
     if (user && data && isSuccess && user.email === data.data.Email) {
       // console.log("navigate to dashboard");
-      navigate("/dashboard", { replace: true });
+      // navigate("/dashboard", { replace: true });
     } else if (isError && error) {
       console.error("Authorization Error:", error);
       navigate("/login", { replace: true });
@@ -107,7 +122,9 @@ function ProtectedDashboardPage() {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["1"]}
+          defaultSelectedKeys={drawerList
+            .filter((row) => row.path === window.location.pathname)
+            .map((row) => row.key)}
           items={drawerList.map((row) => {
             return {
               key: row.key,
@@ -141,20 +158,27 @@ function ProtectedDashboardPage() {
             <Button
               type="primary"
               shape="round"
-              size="middle"
               onClick={handleLogout}
+              icon={
+                <Avatar size="small" src={user ? user.photoURL : undefined} />
+              }
+              iconPosition="start"
             >
               Sign Out
             </Button>
           </Content>
         </Header>
-        <Content style={{ margin: "24px 16px 0" }}>
+        <Content
+          style={{
+            margin: screens.lg ? undefined : "24px 16px 0",
+          }}
+        >
           <div
             style={{
               padding: 20,
-              minHeight: 360,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
+              // minHeight: 360,
+              // background: colorBgContainer,
+              // borderRadius: borderRadiusLG,
             }}
           >
             <Outlet />
