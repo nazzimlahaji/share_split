@@ -4,6 +4,7 @@ import PageNotFound from "../pages/PageNotFound";
 import FirebaseLoginPage from "../pages/FirebaseLoginPage";
 import ProtectedDashboardPage from "../pages/ProtectedDashboardPage";
 import DashboardMainPage from "../pages/DashboardMainPage";
+import UserManagementPage from "../pages/UserManagementPage";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardMainPage />,
+      },
+      {
+        path: "user-management",
+        element: <UserManagementPage />,
       },
       {
         path: "*",
