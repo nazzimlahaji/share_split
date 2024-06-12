@@ -61,6 +61,7 @@ func CreateUser(c *gin.Context) {
 
 func UserList(c *gin.Context) {
 	var users []UserListResponse
+	var count int64
 
 	// Get page number from query string, default to 1 if it doesn't exist
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -69,6 +70,9 @@ func UserList(c *gin.Context) {
 
 	// Calculate offset
 	offset := (page - 1) * perPage
+
+	// Count total number of users
+	initializers.DB.Model(&models.Users{}).Count(&count)
 
 	result := initializers.DB.Model(&models.Users{}).
 		Select("users.id", "users.email", "users.name", "users.deactivated_at", "users.created_at", "users.updated_at", "roles.name as role_name").
@@ -92,6 +96,7 @@ func UserList(c *gin.Context) {
 			"message":  "Users fetched successfully",
 			"page":     page,
 			"per_page": perPage,
+			"total":    count,
 		},
 		"data": users,
 	})
