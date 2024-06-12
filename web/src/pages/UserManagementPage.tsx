@@ -1,7 +1,6 @@
 import { Col, Empty, Grid, Pagination, Row, Spin, Typography } from "antd";
 import { useState } from "react";
 import { useGetUserListQuery } from "../api/apiSlice";
-import SomethingWentWrong from "../components/error/SomethingWentWrong";
 import UserPaper from "../components/userManagement/UserPaper";
 import { auth } from "../hooks/firebase";
 
@@ -39,8 +38,8 @@ function UserManagementPage() {
     </div>;
   }
 
-  if (!userListError) {
-    <SomethingWentWrong />;
+  if (userListError) {
+    console.error("Error fetching user list");
   }
 
   let DisplayElement;
