@@ -9,14 +9,21 @@ function DashboardMainPage() {
 
   return (
     <>
-      <Text
+      <div
         style={{
-          fontWeight: "400",
-          fontSize: 18,
+          marginBottom: 5,
         }}
       >
-        Dashboard Overview
-      </Text>
+        <Text
+          style={{
+            fontWeight: "500",
+            fontSize: 20,
+            color: "#1677ff",
+          }}
+        >
+          Dashboard Overview
+        </Text>
+      </div>
       <div
         style={{
           padding: 15,
