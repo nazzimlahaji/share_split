@@ -11,7 +11,7 @@ import {
   theme,
 } from "antd";
 import { onAuthStateChanged } from "firebase/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useGetIdentityQuery, useLazyGetIdentityQuery } from "../api/apiSlice";
 import { drawerList } from "../data/drawerList";
@@ -24,6 +24,8 @@ const { useBreakpoint } = Grid;
 function ProtectedDashboardPage() {
   const user = auth.currentUser;
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+
   const { isFetching } = useGetIdentityQuery(undefined, {
     skip: !user,
   });
@@ -61,6 +63,10 @@ function ProtectedDashboardPage() {
     if (user && data && isSuccess && user.email === data.data.Email) {
       // console.log("navigate to dashboard");
       // navigate("/dashboard", { replace: true });
+      if (data.data.DeactivatedAt) {
+        console.info("User is deactivated");
+        navigate("/deactivated", { replace: true });
+      }
     } else if (isError && error) {
       console.error("Authorization Error:", error);
       navigate("/login", { replace: true });
@@ -73,7 +79,11 @@ function ProtectedDashboardPage() {
     navigate("/login", { replace: true });
   }
 
-  if (isFetching || isLoading) {
+  function handleCollapse() {
+    setCollapsed(!collapsed);
+  }
+
+  if (isFetching || isLoading || !user) {
     return (
       <Flex
         justify="center"
@@ -87,25 +97,26 @@ function ProtectedDashboardPage() {
       </Flex>
     );
   }
+
   return (
     <Layout
       style={{
         minHeight: "100vh",
         background: colorBgContainer,
+        position: screens.lg ? "static" : "relative",
       }}
     >
       <Sider
         breakpoint="lg"
         collapsedWidth="0"
-        // onBreakpoint={(broken) => {
-        //   console.log(broken);
-        // }}
-        // onCollapse={(collapsed, type) => {
-        //   console.log(collapsed, type);
-        // }}
+        collapsed={collapsed}
+        onCollapse={handleCollapse}
         width="250px"
         style={{
           borderRadius: "0 15px 15px 0",
+          position: screens.lg ? "static" : "absolute",
+          minHeight: "100vh",
+          zIndex: 1, // To make sure it's above the content
         }}
       >
         <div>
@@ -130,7 +141,13 @@ function ProtectedDashboardPage() {
               key: row.key,
               icon: row.icon,
               label: row.label,
-              onClick: () => navigate(row.path),
+              onClick: () => {
+                navigate(row.path);
+
+                if (!screens.lg) {
+                  handleCollapse();
+                }
+              },
             };
           })}
         />
@@ -176,7 +193,7 @@ function ProtectedDashboardPage() {
           <div
             style={{
               padding: 20,
-              // minHeight: 360,
+              minHeight: 360,
               // background: colorBgContainer,
               // borderRadius: borderRadiusLG,
             }}
