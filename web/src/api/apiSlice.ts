@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { auth } from "../hooks/firebase";
-import { IdentifyResult } from "./types";
+import { IdentifyResult, UserListResult } from "./types";
 
 export interface AgenListFilter {
   per_page: number;
@@ -38,6 +38,10 @@ export const api = createApi({
   endpoints: (builder) => ({
     getIdentity: builder.query<IdentifyResult, void>({
       query: () => `whoami`,
+      providesTags: () => ["ACCOUNT"],
+    }),
+    getUserList: builder.query<UserListResult, void>({
+      query: () => `user/list`,
       providesTags: () => ["ACCOUNT"],
     }),
     // getDashboardSummary: builder.query<
@@ -202,4 +206,8 @@ export const api = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetIdentityQuery, useLazyGetIdentityQuery } = api;
+export const {
+  useGetIdentityQuery,
+  useLazyGetIdentityQuery,
+  useGetUserListQuery,
+} = api;
