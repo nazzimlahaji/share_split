@@ -1,19 +1,30 @@
-import { Col, Empty, Row, Spin, Typography } from "antd";
+import { Col, Empty, Grid, Pagination, Row, Spin, Typography } from "antd";
+import { useState } from "react";
 import { useGetUserListQuery } from "../api/apiSlice";
 import SomethingWentWrong from "../components/error/SomethingWentWrong";
 import UserPaper from "../components/userManagement/UserPaper";
 import { auth } from "../hooks/firebase";
 
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 function UserManagementPage() {
   const user = auth.currentUser;
+  const screens = useBreakpoint();
+  const [pagination, setPagination] = useState({ page: 1, perPage: 10 });
+
   const {
     data: userList,
     isFetching: userListFetching,
     isError: userListError,
     isLoading: userListLoading,
-  } = useGetUserListQuery(undefined, { skip: !user });
+  } = useGetUserListQuery(
+    {
+      per_page: pagination.perPage,
+      page: pagination.page,
+    },
+    { skip: !user }
+  );
 
   if (userListLoading) {
     <div
@@ -34,19 +45,54 @@ function UserManagementPage() {
 
   let DisplayElement;
   if (userList && userList.data.length > 0) {
-    DisplayElement = userList.data.map((row) => (
-      <Col key={row.id} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
-        <UserPaper
-          name={row.name}
-          email={row.email}
-          position={row.role_name}
-          status={
-            row.deactivated_at === "" || !row.deactivated_at ? true : false
+    DisplayElement = (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          minHeight: screens.lg ? "calc(100vh - 205px)" : "calc(100vh - 230px)",
+        }}
+      >
+        <Row gutter={[16, 16]}>
+          {
+            (DisplayElement = userList.data.map((row) => (
+              <Col key={row.id} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+                <UserPaper
+                  name={row.name}
+                  email={row.email}
+                  position={row.role_name}
+                  status={
+                    row.deactivated_at === "" || !row.deactivated_at
+                      ? true
+                      : false
+                  }
+                  photoURL={null}
+                />
+              </Col>
+            )))
           }
-          photoURL={null}
-        />
-      </Col>
-    ));
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "15px ",
+          }}
+        >
+          <Pagination
+            defaultCurrent={pagination.page}
+            defaultPageSize={pagination.perPage}
+            onChange={(page, pageSize) => {
+              setPagination({ page, perPage: pageSize });
+            }}
+            total={userList.metadata.total}
+            showSizeChanger
+          />
+        </div>
+      </div>
+    );
   } else {
     DisplayElement = (
       <>
@@ -77,22 +123,21 @@ function UserManagementPage() {
           User Management
         </Text>
       </div>
-      <Row gutter={[16, 16]}>
-        {userListFetching ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              margin: "auto",
-            }}
-          >
-            <Spin size="large" />
-          </div>
-        ) : (
-          DisplayElement
-        )}
-      </Row>
+
+      {userListFetching ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            margin: "auto",
+          }}
+        >
+          <Spin size="large" />
+        </div>
+      ) : (
+        DisplayElement
+      )}
     </>
   );
 }

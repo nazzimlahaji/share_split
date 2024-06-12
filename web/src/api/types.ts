@@ -27,5 +27,13 @@ export interface UserListResult {
   metadata: {
     message: string;
     error?: string;
+    page: number;
+    per_page: number;
+    total: number;
   };
+}
+
+export interface UserListFilter {
+  per_page: number;
+  page: number;
 }
