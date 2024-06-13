@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { auth } from "../hooks/firebase";
-import { IdentifyResult, UserListFilter, UserListResult } from "./types";
+import {
+  IdentifyResult,
+  RoleListResult,
+  UserListFilter,
+  UserListResult,
+} from "./types";
 
 export interface AgenListFilter {
   per_page: number;
@@ -46,6 +51,9 @@ export const api = createApi({
         params: { ...params },
       }),
       providesTags: () => ["ACCOUNT"],
+    }),
+    getRoleList: builder.query<RoleListResult, void>({
+      query: () => `role/list`,
     }),
     // getDashboardSummary: builder.query<
     //   SummaryResult,
@@ -213,4 +221,5 @@ export const {
   useGetIdentityQuery,
   useLazyGetIdentityQuery,
   useGetUserListQuery,
+  useGetRoleListQuery,
 } = api;

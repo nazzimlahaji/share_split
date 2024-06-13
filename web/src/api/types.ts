@@ -37,3 +37,13 @@ export interface UserListFilter {
   per_page: number;
   page: number;
 }
+
+export interface RoleListResult {
+  data: {
+    id: string;
+    name: string;
+  }[];
+  metadata: {
+    message: string;
+  };
+}

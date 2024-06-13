@@ -15,6 +15,7 @@ func init() {
 	initializers.ConnectToDb()
 	initializers.FirebaseConfig()
 }
+
 func main() {
 	r := gin.Default()
 
@@ -29,6 +30,8 @@ func main() {
 
 			api.POST("/user/create", controllers.CreateUser)
 			api.GET("/user/list", controllers.UserList)
+
+			api.GET("/role/list", controllers.RoleList)
 		}
 	}
 
