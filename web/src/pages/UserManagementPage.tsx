@@ -1,16 +1,55 @@
-import { Col, Empty, Grid, Pagination, Row, Spin, Typography } from "antd";
+import { UserAddOutlined } from "@ant-design/icons";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import {
+  Alert,
+  Button,
+  Col,
+  Divider,
+  Empty,
+  FloatButton,
+  Form,
+  Grid,
+  Input,
+  Modal,
+  Pagination,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Typography,
+} from "antd";
 import { useState } from "react";
-import { useGetUserListQuery } from "../api/apiSlice";
+import {
+  useCreateUserMutation,
+  useGetRoleListQuery,
+  useGetUserListQuery,
+} from "../api/apiSlice";
+import { CreateUserResponse } from "../api/types";
 import UserPaper from "../components/userManagement/UserPaper";
 import { auth } from "../hooks/firebase";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
+interface SubmitFormType {
+  name: string;
+  email: string;
+  role_id: string;
+}
+
+interface ErrorMsgType {
+  message: string;
+  error: string;
+}
+
 function UserManagementPage() {
   const user = auth.currentUser;
   const screens = useBreakpoint();
   const [pagination, setPagination] = useState({ page: 1, perPage: 10 });
+  const [openModal, setOpenModal] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<ErrorMsgType | null>(null);
+
+  const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation();
 
   const {
     data: userList,
@@ -24,6 +63,44 @@ function UserManagementPage() {
     },
     { skip: !user }
   );
+
+  const {
+    data: roleList,
+    isFetching: roleListFetching,
+    isError: roleListError,
+  } = useGetRoleListQuery(undefined, { skip: !user });
+
+  function handleModalOpen() {
+    setOpenModal(true);
+  }
+
+  function handleModalClose() {
+    setOpenModal(false);
+  }
+
+  async function handleSubmit(e: SubmitFormType) {
+    const data = new FormData();
+    data.append("name", e.name);
+    data.append("email", e.email);
+    data.append("role_id", e.role_id);
+
+    const res = await createUser(data);
+
+    if (res.error) {
+      const data = res.error as FetchBaseQueryError;
+      const errorMsg = data.data as CreateUserResponse;
+
+      if (errorMsg.metadata.error === "validation_error") {
+        setErrorMsg({
+          message: errorMsg.metadata.message,
+          error: errorMsg.metadata.error,
+        });
+      }
+      return;
+    }
+
+    handleModalClose();
+  }
 
   if (userListLoading) {
     <div
@@ -40,6 +117,9 @@ function UserManagementPage() {
 
   if (userListError) {
     console.error("Error fetching user list");
+  }
+  if (roleListError) {
+    console.error("Error fetching role list");
   }
 
   let DisplayElement;
@@ -135,8 +215,142 @@ function UserManagementPage() {
           <Spin size="large" />
         </div>
       ) : (
-        DisplayElement
+        <>
+          {DisplayElement}
+          <FloatButton
+            shape="circle"
+            type="primary"
+            style={{ bottom: 75, right: 30, width: 50, height: 50 }}
+            icon={<UserAddOutlined />}
+            tooltip="Add User"
+            onClick={handleModalOpen}
+          />
+        </>
       )}
+      <Modal
+        title={
+          <>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 20,
+                color: "#1677ff",
+              }}
+            >
+              Add User
+            </Text>
+            <Divider
+              style={{
+                margin: "5px 0 ",
+              }}
+            />
+          </>
+        }
+        centered
+        open={openModal}
+        onOk={handleModalOpen}
+        onCancel={handleModalClose}
+        keyboard
+        okText="Confirm"
+        footer
+      >
+        {errorMsg && (
+          <div
+            style={{
+              margin: "10px 0",
+              // Animation may not work
+              transition:
+                "opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
+              transform: errorMsg ? "translateY(0)" : "translateY(-10px)",
+              opacity: errorMsg ? 1 : 0,
+            }}
+          >
+            <Alert
+              message="Registration Failed"
+              description={errorMsg.message}
+              type="error"
+              showIcon
+              style={{
+                padding: "10px",
+              }}
+            />
+          </div>
+        )}
+        <Form
+          name="name_form"
+          labelCol={{ span: 4 }}
+          initialValues={{ remember: true }}
+          onFinish={handleSubmit}
+          autoComplete="off"
+          size="large"
+        >
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[
+              { required: true, message: "Please input the name" },
+              { min: 4, message: "Name must be at least 4 characters" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please input the email",
+              },
+            ]}
+          >
+            <Input onChange={() => setErrorMsg(null)} />
+          </Form.Item>
+          {roleList && roleList.data.length > 0 && (
+            <Form.Item
+              label="Position"
+              name="role_id"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input the position",
+                },
+              ]}
+              initialValue={roleList.data[1].id}
+            >
+              <Select
+                style={{ width: "100%" }}
+                options={roleList.data.map((role) => ({
+                  value: role.id,
+                  label: role.name,
+                }))}
+                loading={roleListFetching}
+              />
+            </Form.Item>
+          )}
+          <Form.Item>
+            <Space
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Button htmlType="reset" disabled={isCreatingUser}>
+                Reset
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={isCreatingUser}
+                iconPosition="end"
+              >
+                Submit
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 }

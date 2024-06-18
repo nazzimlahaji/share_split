@@ -1,10 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { auth } from "../hooks/firebase";
 import {
-  IdentifyResult,
-  RoleListResult,
+  CreateUserResponse,
+  IdentifyResponse,
+  RoleListResponse,
   UserListFilter,
-  UserListResult,
+  UserListResponse,
 } from "./types";
 
 export interface AgenListFilter {
@@ -39,61 +40,38 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ACCOUNT"],
+  tagTypes: ["ACCOUNT", "USER_LIST"],
   endpoints: (builder) => ({
-    getIdentity: builder.query<IdentifyResult, void>({
+    // GET
+    getIdentity: builder.query<IdentifyResponse, void>({
       query: () => `whoami`,
       providesTags: () => ["ACCOUNT"],
     }),
-    getUserList: builder.query<UserListResult, UserListFilter>({
+    getUserList: builder.query<UserListResponse, UserListFilter>({
       query: (params) => ({
         url: `user/list`,
         params: { ...params },
       }),
-      providesTags: () => ["ACCOUNT"],
+      providesTags: () => ["ACCOUNT", "USER_LIST"],
     }),
-    getRoleList: builder.query<RoleListResult, void>({
+    getRoleList: builder.query<RoleListResponse, void>({
       query: () => `role/list`,
     }),
-    // getDashboardSummary: builder.query<
-    //   SummaryResult,
-    //   {
-    //     params: { tahun: string };
-    //   }
-    // >({
-    //   query: (params) => ({
-    //     url: `dashboard/summary`,
-    //     params: { ...params.params },
-    //   }),
-    //   providesTags: () => [{ type: "ACCOUNT" }, { type: "COMMISSION_PAID" }],
-    // }),
-    // getAgenList: builder.query<AgenListResult, AgenListFilter>({
-    //   query: (params) => ({
-    //     url: `user/list`,
-    //     params: {
-    //       ...params,
-    //     },
-    //   }),
-    //   providesTags: () => ["ACCOUNT", "PROFILE", "AGEN_LIST"],
-    // }),
-    // getAgentCommissions: builder.query<
-    //   AgentCommission,
-    //   { params: { per_page: number; page: number } }
-    // >({
-    //   query: (data) => ({
-    //     url: "commission",
-    //     params: {
-    //       ...data.params,
-    //     },
-    //   }),
-    //   providesTags: () => ["COMMISSION_PAID"],
-    // }),
-    // getAgenProfile: builder.query<AgenProfileResult, string>({
-    //   query: (uuid) => ({
-    //     url: `user/show/${uuid}`,
-    //   }),
-    //   providesTags: () => ["ACCOUNT", "PROFILE"],
-    // }),
+
+    // POST
+    createUser: builder.mutation<CreateUserResponse, FormData>({
+      query: (data) => ({
+        url: `user/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (_result, error) => {
+        if (error) {
+          return [];
+        }
+        return ["USER_LIST"];
+      },
+    }),
     // updateAgenProfile: builder.mutation<
     //   EditAgenProfileResult,
     //   { uuid: string; payload: EditAgenProfilePayload }
@@ -218,8 +196,12 @@ export const api = createApi({
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
 export const {
+  // GET
   useGetIdentityQuery,
   useLazyGetIdentityQuery,
   useGetUserListQuery,
   useGetRoleListQuery,
+
+  // POST
+  useCreateUserMutation,
 } = api;

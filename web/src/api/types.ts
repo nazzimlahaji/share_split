@@ -1,4 +1,5 @@
-export interface IdentifyResult {
+// GET
+export interface IdentifyResponse {
   metadata: {
     message: string;
   };
@@ -14,7 +15,7 @@ export interface IdentifyResult {
   };
 }
 
-export interface UserListResult {
+export interface UserListResponse {
   data: {
     id: string;
     name: string;
@@ -38,12 +39,20 @@ export interface UserListFilter {
   page: number;
 }
 
-export interface RoleListResult {
+export interface RoleListResponse {
   data: {
     id: string;
     name: string;
   }[];
   metadata: {
     message: string;
+  };
+}
+
+// POST
+export interface CreateUserResponse {
+  metadata: {
+    message: string;
+    error?: string;
   };
 }
