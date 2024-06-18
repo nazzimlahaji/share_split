@@ -17,9 +17,9 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
+	route := gin.Default()
 
-	api := r.Group("/api")
+	api := route.Group("/api")
 	{
 		// Public routes
 
@@ -30,6 +30,7 @@ func main() {
 
 			api.POST("/user/create", controllers.CreateUser)
 			api.GET("/user/list", controllers.UserList)
+			api.GET("/user/:uuid/detail", controllers.UserDetail)
 
 			api.GET("/role/list", controllers.RoleList)
 		}
@@ -40,5 +41,5 @@ func main() {
 		log.Default().Println("Port not set, defaulting to 8080")
 		port = "8080"
 	}
-	r.Run(":" + port)
+	route.Run(":" + port)
 }
