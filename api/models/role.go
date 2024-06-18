@@ -1,8 +1,8 @@
 package models
 
-import "api/helpers"
+import "gorm.io/gorm"
 
 type Role struct {
-	helpers.Model
+	gorm.Model
 	Name string
 }

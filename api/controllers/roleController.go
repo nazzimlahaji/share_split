@@ -5,12 +5,11 @@ import (
 	"api/models"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type RoleListResponse struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 func RoleList(c *gin.Context) {

@@ -1,15 +1,14 @@
 package models
 
 import (
-	"api/helpers"
-
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type GroupMember struct {
-	helpers.Model
-	GroupID uuid.UUID `gorm:"not null,constraint:OnUpdate:CASCADE,OnDelete:SET NULL;type:uuid;"`
+	gorm.Model
+	GroupID uint      `gorm:"not null,constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Group   Group     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	UserID  uuid.UUID `gorm:"not null,constraint:OnUpdate:CASCADE,OnDelete:SET NULL;type:uuid;"`
+	UserID  uuid.UUID `gorm:"not null,constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	User    Users     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

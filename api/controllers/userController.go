@@ -1,28 +1,27 @@
 package controllers
 
 import (
-	"api/helpers"
 	"api/initializers"
 	"api/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type CreateUserRequest struct {
-	Email string `form:"email" binding:"required,email"`
-	Name  string `form:"name" binding:"required"`
+	Email  string `form:"email" binding:"required,email"`
+	Name   string `form:"name" binding:"required"`
+	RoleID uint   `form:"role_id" binding:"required"`
 }
 
 type UserListResponse struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	Email         string    `json:"email"`
-	RoleName      string    `json:"role_name"`
-	DeactivatedAt string    `json:"deactivated_at"`
-	CreatedAt     string    `json:"created_at"`
-	UpdatedAt     string    `json:"updated_at"`
+	ID            uint   `json:"id"`
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	RoleName      string `json:"role_name"`
+	DeactivatedAt string `json:"deactivated_at"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 func CreateUser(c *gin.Context) {
@@ -32,14 +31,38 @@ func CreateUser(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"metadata": gin.H{
 				"message": "Invalid request",
-				"error":   helpers.FormatValidationErrors(err),
+				"error":   err.Error(),
+			},
+		})
+		return
+	}
+
+	// Check if the role exists
+	var role models.Role
+	if err := initializers.DB.First(&role, request.RoleID).Error; err != nil {
+		c.JSON(400, gin.H{
+			"metadata": gin.H{
+				"message": "Invalid Role ID",
+				"error":   err.Error(),
+			},
+		})
+		return
+	}
+
+	// Check if the email already exists
+	var existingUser models.Users
+	if err := initializers.DB.Where("email = ?", request.Email).First(&existingUser).Error; err == nil {
+		c.JSON(400, gin.H{
+			"metadata": gin.H{
+				"message": "Email already exist",
+				"error":   "validation_error",
 			},
 		})
 		return
 	}
 
 	// Create a new user in the database
-	user := models.Users{Name: request.Name, Email: request.Email}
+	user := models.Users{Name: request.Name, Email: request.Email, RoleID: request.RoleID}
 	result := initializers.DB.Create(&user)
 	if result.Error != nil {
 		c.JSON(500, gin.H{
@@ -77,6 +100,7 @@ func UserList(c *gin.Context) {
 	result := initializers.DB.Model(&models.Users{}).
 		Select("users.id", "users.email", "users.name", "users.deactivated_at", "users.created_at", "users.updated_at", "roles.name as role_name").
 		Joins("left join roles on users.role_id = roles.id").
+		Order("users.created_at DESC").
 		Offset(offset). // Add offset
 		Limit(perPage). // Limit the number of users
 		Find(&users)
