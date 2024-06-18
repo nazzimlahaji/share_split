@@ -10,6 +10,7 @@ interface UserPaperProps {
   email: string;
   status: boolean;
   photoURL?: string | null;
+  onClick?: () => void;
 }
 
 function UserPaper({
@@ -18,6 +19,7 @@ function UserPaper({
   email,
   status,
   photoURL,
+  onClick,
 }: UserPaperProps) {
   const {
     token: { colorBgContainer, borderRadius },
@@ -25,6 +27,7 @@ function UserPaper({
 
   return (
     <Box
+      onClick={onClick}
       sx={{
         backgroundColor: colorBgContainer,
         borderRadius: borderRadius,

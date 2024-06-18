@@ -25,8 +25,10 @@ import {
   useGetUserListQuery,
 } from "../api/apiSlice";
 import { CreateUserResponse } from "../api/types";
-import UserPaper from "../components/userManagement/UserPaper";
+import UserPaper from "../components/UserManagement/UserPaper";
 import { auth } from "../hooks/firebase";
+import CustomLinearProgress from "../components/CustomLinearProgress";
+import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -44,6 +46,7 @@ interface ErrorMsgType {
 
 function UserManagementPage() {
   const user = auth.currentUser;
+  const navigate = useNavigate();
   const screens = useBreakpoint();
   const [pagination, setPagination] = useState({ page: 1, perPage: 10 });
   const [openModal, setOpenModal] = useState(false);
@@ -147,6 +150,11 @@ function UserManagementPage() {
                       : false
                   }
                   photoURL={null}
+                  onClick={() => {
+                    navigate(
+                      "/dashboard/user-management/" + row.uuid + "/detail"
+                    );
+                  }}
                 />
               </Col>
             )))
@@ -204,15 +212,8 @@ function UserManagementPage() {
       </div>
 
       {userListFetching ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            margin: "auto",
-          }}
-        >
-          <Spin size="large" />
+        <div>
+          <CustomLinearProgress />
         </div>
       ) : (
         <>

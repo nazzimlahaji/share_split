@@ -18,6 +18,7 @@ export interface IdentifyResponse {
 export interface UserListResponse {
   data: {
     id: string;
+    uuid: string;
     name: string;
     email: string;
     role_name: string;
@@ -46,6 +47,23 @@ export interface RoleListResponse {
   }[];
   metadata: {
     message: string;
+  };
+}
+
+export interface UserDetailResponse {
+  data: {
+    id: number;
+    uuid: string;
+    name: string;
+    email: string;
+    role_name: string;
+    deactivated_at: string;
+    created_at: string;
+    updated_at: string;
+  };
+  metadata: {
+    message: string;
+    error?: string;
   };
 }
 
