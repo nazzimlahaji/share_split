@@ -1,45 +1,34 @@
 import { UserAddOutlined } from "@ant-design/icons";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import {
-  Alert,
-  Button,
   Col,
-  Divider,
   Empty,
   FloatButton,
-  Form,
   Grid,
-  Input,
-  Modal,
   Pagination,
   Row,
-  Select,
-  Space,
   Spin,
   Typography,
 } from "antd";
 import { useState } from "react";
-import {
-  useCreateUserMutation,
-  useGetRoleListQuery,
-  useGetUserListQuery,
-} from "../api/apiSlice";
+import { useNavigate } from "react-router-dom";
+import { useCreateUserMutation, useGetUserListQuery } from "../api/apiSlice";
 import { CreateUserResponse } from "../api/types";
+import CustomLinearProgress from "../components/CustomLinearProgress";
+import AddUserModal from "../components/UserManagement/AddUserModal";
 import UserPaper from "../components/UserManagement/UserPaper";
 import { auth } from "../hooks/firebase";
-import CustomLinearProgress from "../components/CustomLinearProgress";
-import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface SubmitFormType {
+export interface SubmitFormType {
   name: string;
   email: string;
   role_id: string;
 }
 
-interface ErrorMsgType {
+export interface ErrorMsgType {
   message: string;
   error: string;
 }
@@ -67,18 +56,16 @@ function UserManagementPage() {
     { skip: !user }
   );
 
-  const {
-    data: roleList,
-    isFetching: roleListFetching,
-    isError: roleListError,
-  } = useGetRoleListQuery(undefined, { skip: !user });
-
   function handleModalOpen() {
     setOpenModal(true);
   }
 
   function handleModalClose() {
     setOpenModal(false);
+  }
+
+  function handleErrorMessage(e: ErrorMsgType | null) {
+    setErrorMsg(e);
   }
 
   async function handleSubmit(e: SubmitFormType) {
@@ -94,7 +81,7 @@ function UserManagementPage() {
       const errorMsg = data.data as CreateUserResponse;
 
       if (errorMsg.metadata.error === "validation_error") {
-        setErrorMsg({
+        handleErrorMessage({
           message: errorMsg.metadata.message,
           error: errorMsg.metadata.error,
         });
@@ -120,9 +107,6 @@ function UserManagementPage() {
 
   if (userListError) {
     console.error("Error fetching user list");
-  }
-  if (roleListError) {
-    console.error("Error fetching role list");
   }
 
   let DisplayElement;
@@ -163,6 +147,7 @@ function UserManagementPage() {
         <div
           style={{
             display: "flex",
+            // position: "sticky", // May used later on different idea
             justifyContent: "center",
             alignItems: "center",
             marginTop: "15px ",
@@ -228,130 +213,16 @@ function UserManagementPage() {
           />
         </>
       )}
-      <Modal
-        title={
-          <>
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 20,
-                color: "#1677ff",
-              }}
-            >
-              Add User
-            </Text>
-            <Divider
-              style={{
-                margin: "5px 0 ",
-              }}
-            />
-          </>
-        }
-        centered
-        open={openModal}
-        onOk={handleModalOpen}
-        onCancel={handleModalClose}
-        keyboard
-        okText="Confirm"
-        footer
-      >
-        {errorMsg && (
-          <div
-            style={{
-              margin: "10px 0",
-              // Animation may not work
-              transition:
-                "opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
-              transform: errorMsg ? "translateY(0)" : "translateY(-10px)",
-              opacity: errorMsg ? 1 : 0,
-            }}
-          >
-            <Alert
-              message="Registration Failed"
-              description={errorMsg.message}
-              type="error"
-              showIcon
-              style={{
-                padding: "10px",
-              }}
-            />
-          </div>
-        )}
-        <Form
-          name="name_form"
-          labelCol={{ span: 4 }}
-          initialValues={{ remember: true }}
-          onFinish={handleSubmit}
-          autoComplete="off"
-          size="large"
-        >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please input the name" },
-              { min: 4, message: "Name must be at least 4 characters" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              {
-                required: true,
-                type: "email",
-                message: "Please input the email",
-              },
-            ]}
-          >
-            <Input onChange={() => setErrorMsg(null)} />
-          </Form.Item>
-          {roleList && roleList.data.length > 0 && (
-            <Form.Item
-              label="Position"
-              name="role_id"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input the position",
-                },
-              ]}
-              initialValue={roleList.data[1].id}
-            >
-              <Select
-                style={{ width: "100%" }}
-                options={roleList.data.map((role) => ({
-                  value: role.id,
-                  label: role.name,
-                }))}
-                loading={roleListFetching}
-              />
-            </Form.Item>
-          )}
-          <Form.Item>
-            <Space
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <Button htmlType="reset" disabled={isCreatingUser}>
-                Reset
-              </Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isCreatingUser}
-                iconPosition="end"
-              >
-                Submit
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+      <AddUserModal
+        openModal={openModal}
+        errorMsg={errorMsg}
+        user={user}
+        isCreatingUser={isCreatingUser}
+        handleModalOpen={handleModalOpen}
+        handleModalClose={handleModalOpen}
+        handleSubmit={handleSubmit}
+        handleErrorMessage={handleErrorMessage}
+      />
     </>
   );
 }
