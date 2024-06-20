@@ -1,5 +1,6 @@
 import { UserAddOutlined } from "@ant-design/icons";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type { NotificationArgsProps } from "antd";
 import {
   Col,
   Empty,
@@ -9,6 +10,7 @@ import {
   Row,
   Spin,
   Typography,
+  notification,
 } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,8 +21,11 @@ import AddUserModal from "../components/UserManagement/AddUserModal";
 import UserPaper from "../components/UserManagement/UserPaper";
 import { auth } from "../hooks/firebase";
 
+type NotificationPlacement = NotificationArgsProps["placement"];
+
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
+const { useNotification } = notification;
 
 export interface SubmitFormType {
   name: string;
@@ -37,11 +42,16 @@ function UserManagementPage() {
   const user = auth.currentUser;
   const navigate = useNavigate();
   const screens = useBreakpoint();
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10 });
+  const [api, contextHolder] = useNotification();
+
+  const [pagination, setPagination] = useState({ page: 1, perPage: 20 });
   const [openModal, setOpenModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState<ErrorMsgType | null>(null);
 
-  const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation();
+  const [
+    createUser,
+    { isLoading: isCreatingUser, isSuccess: createUserSucess },
+  ] = useCreateUserMutation();
 
   const {
     data: userList,
@@ -68,6 +78,20 @@ function UserManagementPage() {
     setErrorMsg(e);
   }
 
+  function handleOpenNotification(
+    type: "success" | "error" | "info" | "warning",
+    message: string,
+    placement: NotificationPlacement,
+    description?: string
+  ) {
+    api.open({
+      type,
+      message,
+      description,
+      placement,
+    });
+  }
+
   async function handleSubmit(e: SubmitFormType) {
     const data = new FormData();
     data.append("name", e.name);
@@ -90,6 +114,11 @@ function UserManagementPage() {
     }
 
     handleModalClose();
+    handleOpenNotification(
+      "success",
+      "User created successfully",
+      "bottomLeft"
+    );
   }
 
   if (userListLoading) {
@@ -218,11 +247,13 @@ function UserManagementPage() {
         errorMsg={errorMsg}
         user={user}
         isCreatingUser={isCreatingUser}
+        createUserSucess={createUserSucess}
         handleModalOpen={handleModalOpen}
-        handleModalClose={handleModalOpen}
+        handleModalClose={handleModalClose}
         handleSubmit={handleSubmit}
         handleErrorMessage={handleErrorMessage}
       />
+      {contextHolder}
     </>
   );
 }

@@ -9,17 +9,20 @@ import {
   Space,
   Typography,
 } from "antd";
+import { User } from "firebase/auth";
+import { useEffect } from "react";
 import { useGetRoleListQuery } from "../../api/apiSlice";
 import { ErrorMsgType, SubmitFormType } from "../../pages/UserManagementPage";
-import { User } from "firebase/auth";
 
 const { Text } = Typography;
+const { useForm } = Form;
 
 interface Props {
   openModal: boolean;
   errorMsg: ErrorMsgType | null;
   user: User | null;
   isCreatingUser: boolean;
+  createUserSucess: boolean;
   handleModalOpen: () => void;
   handleModalClose: () => void;
   handleSubmit: (e: SubmitFormType) => void;
@@ -31,11 +34,20 @@ function AddUserModal({
   errorMsg,
   user,
   isCreatingUser,
+  createUserSucess,
   handleModalOpen,
   handleModalClose,
   handleSubmit,
   handleErrorMessage,
 }: Props) {
+  const [form] = useForm();
+
+  useEffect(() => {
+    if (createUserSucess) {
+      form.resetFields(["name", "email"]);
+    }
+  }, [createUserSucess, form]);
+
   const {
     data: roleList,
     isFetching: roleListFetching,
@@ -96,7 +108,8 @@ function AddUserModal({
         </div>
       )}
       <Form
-        name="name_form"
+        name="addUserForm"
+        form={form}
         labelCol={{ span: 4 }}
         initialValues={{ remember: true }}
         onFinish={handleSubmit}
