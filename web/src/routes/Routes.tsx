@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import HomePage from "../pages/HomePage";
+// import HomePage from "../pages/HomePage";
 import PageNotFound from "../pages/PageNotFound";
 import FirebaseLoginPage from "../pages/FirebaseLoginPage";
 import ProtectedDashboardPage from "../pages/ProtectedDashboardPage";
@@ -8,14 +8,15 @@ import UserManagementPage from "../pages/UserManagementPage";
 import UserDetailPage from "../pages/UserDetailPage";
 
 export const router = createBrowserRouter([
+  // {
+  //   path: "/",
+  //   element: <HomePage />,
+  //   index: true,
+  // },
   {
     path: "/",
-    element: <HomePage />,
-    index: true,
-  },
-  {
-    path: "/login",
     element: <FirebaseLoginPage />,
+    index: true,
   },
   {
     path: "/dashboard",

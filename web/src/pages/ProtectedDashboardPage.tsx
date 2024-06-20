@@ -69,14 +69,14 @@ function ProtectedDashboardPage() {
       }
     } else if (isError && error) {
       console.error("Authorization Error:", error);
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [data, error, isError, isSuccess, navigate, user]);
 
   async function handleLogout() {
     await signOut();
 
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   }
 
   function handleCollapse() {
